@@ -46,7 +46,7 @@ setwd() # (ex: "/Users/nicoleblack/Desktop/qbio_490_nicole/week3_R")
 
 ```{r setup Exercise 2.3}
     # replace path with the path to your qbio_490_name directory
-    knitr::opts_knit$set(root.dir = normalizePath("/PATH/TO/DIRECTORY")) 
+    knitr::opts_knit$set(root.dir = normalizePath("/GitHub/qbio490/qbio_490_JoshelineNguyen")) 
 ```
 
   Now that your environment is set up, let's get into coding!
@@ -62,7 +62,7 @@ var_vector <- c(3, 2, 1)
 
 ## Create a new variable my_var to store anything you choose:
 
-
+my_var<-"josh"
 print(my_var)
 ```
 
@@ -79,21 +79,21 @@ na <- NA
 
 # Boolean Value is either true or false
 ## booleans can be defined in a variety of ways in R!
-true_var <- 
-false_var <- 
+true_var <- TRUE
+false_var <- FALSE
 
 ## numeric is a catch all for any number value in R
-negative <- 
-decimal <- 
+negative <- -1
+decimal <- 1.5
 
 ## a string is any text value
 ## strings can be enclosed in single or double quote
-string_var <- 
-char_var <- 
+string_var <- "nguyen"
+char_var <- 'a'
 
 ## vectors contain data elements of the same data type
 ## they are declared by enclosing elements in c()
-vector <- c() 
+vector <- c(1, 2, 3) 
 
 ## a factor is a categorical variable
 ## a factor has data elements (defined like a vector) and categories (known also as levels), that are inferred from the data 
@@ -125,6 +125,18 @@ SUMOFAGES <- sum(numeric_vector)
 
 ```{r Exercise 3.4}
 ## add code here!
+#string
+name<-"josheline nguyen"
+#int
+age<-20
+#string
+birthday<-"09/03/2004"
+#string vector
+three_fav_colors<-c("Green", "Blue", "Orange")
+name
+age
+birthday
+three_fav_colors
 ```
 
 ###### (4) Functions
@@ -156,8 +168,11 @@ max_value
 list_of_numbers <- c(1, 1, 2, 3, 5, 8, 13, 21)
 
 ## call functions here
-
-
+sum(list_of_numbers)
+min(list_of_numbers)
+mean(list_of_numbers)
+mode(list_of_numbers)
+summary(list_of_numbers)
 ```
 
 ###### (5) Logic and Control Flow
@@ -196,13 +211,15 @@ list_of_numbers <- c(1, 1, 2, 3, 5, 8, 13, 21)
   The syntax for "if", "else if", and "else" statements is as follows. Fill in possible conditions and actions so that the "if" statement is skipped, and the "else if" runs, printing out "Success!". Run the block to test.
 
 ```{r Exercise 5.3}
+random_int = 3;
+random_int_2 = 10;
 
-if (# condition) {
-  # action
-} else if (# condition) {
-  # action
+if (random_int == random_int_2) {
+  print("Fail!")
+} else if (random_int_2 > random_int) {
+  print("Success!")
 } else {
-  # action
+  print("Fail!")
 }
 ```
 
@@ -272,9 +289,13 @@ while (i < 10) {
 x = 0
 my_list <- c(1, 10, x)
 mean <- mean(my_list)
-while (# condition) {
+while (mean < 10) {
   # do something
+  print(mean)
   # update condition
+  x<- x +1
+  my_list<- c(1, 10, x)
+  mean <- mean(my_list)
 }
 ```
 
@@ -302,6 +323,9 @@ for (element in list) { # note that I can call "element" whatever I want, it lik
 list <- c(1, 5, 20, 0)
 
 # write loop here
+for (ints in list){
+  print(ints^3)
+}
 ```
 
   You can also use a for loop to run code a specified number of times by using a sequence (ex: 1:5) instead of a list. The syntax is as follows:
@@ -316,7 +340,9 @@ for (i in 1:10) {
 
 ```{r Exercise 6.8}
 # write loop here
-
+for (i in -7:7){
+  print(i)
+}
 ```
 
   VERY IMPORTANT NOTE: In R, we generally want to avoid using loops since they are fairly slow and because R is already optimized for repeating actions on any lists/vectors. However, there are certain instances where loops must be used, so if you absolutely cannot think of any other solution, a loop is always a good backup.
@@ -421,6 +447,8 @@ library(package) # you need to load in a package in every file that uses it (it'
 
 ```{r}
 # write code here
+help(is.na)
+args(is.na)
 ```
 
 ###### (12) Further Practice
