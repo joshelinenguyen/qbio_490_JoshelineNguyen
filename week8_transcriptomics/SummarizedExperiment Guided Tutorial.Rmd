@@ -34,7 +34,7 @@ Let's take a look at rna_se (RNA Summarized Experiment). Call head() and str(). 
 
 ```{r Exercise 1.1}
 # write code here
-
+rna_se
 ```
 
 Use the dim() function to find the dimensions of the colData, rowRanges@elementMetadata, and unstranded dataframes. Record them below:
@@ -76,7 +76,7 @@ Using the nested dataframe colData in rna_se, view the first 15 values in the ag
 
 ```{r Exercise 2.1}
 # write code here
-
+rna_clinical <- as.data.frame(rna_se@colData)
 ```
 
 Call summary on the age_at_index column. Record the output below:
@@ -104,15 +104,16 @@ Create a data frame called rna_clinical that contains data from colData.
 Use the as.data.frame() function to change this from an S4 object to a data frame object.
 
 ```{r Exercise 2.4}
+column_mask <- ifelse(colnames(rna_clinical) %in% c('treatments', 'primary_site', 'disease_type'), F, T)
 
-
+rna_clincal <- rna_clinical[,column_mask]
 
 ```
 
 Three columns in rna_clinical contain nested lists. To save the dataframe as a csv later, we need to first remove those columns. Using boolean masks, subset out treatments, primary_site, and disease_type
 
 ```{r Exercise 2.5}
-
+write.csv(rna_clinical, '/home1/joshelin/490_cluster/analysis_data/BRCA_rna_clinical.csv')
 
 
 ```
@@ -124,22 +125,23 @@ Call head() on rowRanges@elementMetadata:
 
 ```{r Exercise 3.1}
 # write code here
-
+rna_se@rowRanges@elementMetadata
 
 ```
 
 Create a data frame called rna_genes that contains data from elementMetadata.
 
 ```{r Exercise 3.2}
-
+rna_genes <- rna_se@rowRanges@elementMetadata
 
 ```
 
 Use the as.data.frame() function to change this from an S4 object to a data frame object
 
 ```{r Exercise 3.3}
-
-
+rna_genes <- as.data.frame(rna_genes)
+write.csv(rna_genes, '/home1/joshelin/490_cluster/analysis_data/BRCA_rna_genes.csv')
+rna_genes <- read.csv('/home1/joshelin/490_cluster/analysis_data/BRCA_rna_genes.csv')
 ```
 
 ###### (4) Assays
@@ -155,7 +157,7 @@ What are the names of the 6 assays?
 Create a new data frame called "rna_counts" that contains the data from unstranded. Recall the patient with NA age data? We need to exclude that patient. We can use the same mask to do this.
 
 ```{r Exercise 4.2}
-
+rna_counts <- rna_se@assays@data$unstranded
 
 ```
 
@@ -209,16 +211,17 @@ As you can see, both the row names and column names are informative.
 Now that rna_genes has informative row/column names, let's move on to rna_counts. Call rownames() and colnames() on rna_counts.
 
 ```{r Exercise 5.7}
+colnames(rna_counts) <- rna_clinical$patient
+rownames(rna_counts) <- rna_genes$gene_id
 
+write.csv(rna_counts, '/home1/joshelin/490_cluster/analysis_data/BRCA_rna_counts.csv')
 
-
+rna_counts <- read.csv ('/home1/joshelin/490_cluster/analysis_data/BRCA_rna_counts.csv')
 ```
 
 Uh oh! Looks like neither the row nor column names are very informative. Given what we did to the other data frames, add column and row names to rna_counts. Name the columns based on the patient barcodes (ie the row names for rna_clinical), and name the rows based on the gene id's (ie the column names for rna_gene).
 
 ```{r Exercise 5.8}
-
-
 
 ```
 
