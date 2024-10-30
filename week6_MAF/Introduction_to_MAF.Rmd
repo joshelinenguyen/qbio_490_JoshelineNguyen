@@ -18,14 +18,53 @@ In this assignment, you will need to use your skills learned in class to demonst
 *Pre-Assignment*
 Load all necessary packages, read in the clinical data.csv file you have in your analysis_data folder, and instantiate the MAF_object.
 ```{r}
+# install and load maftools, TCGAbiolinks, and ggplot2 
+if (!require("BiocManager", quietly = TRUE))
+  install.packages("BiocManager")
+BiocManager::install(version = "3.16")
+if (!require("TCGAbiolinks", quietly = TRUE))
+  BiocManager::install("TCGAbiolinks")
+if (!require("maftools", quietly = TRUE))
+  BiocManager::install("maftools")
+library(BiocManager)
+library(TCGAbiolinks)
+library(maftools)
 
+# Set Path
+setwd('/Users/nataliefortunato/Documents/qbio_490_nataliefortunato/analysis_data')
+
+# Read Clinical Data csv
+clinical <- read.csv("brca_clinical_data.csv")
+
+# Initialize maf_object
+maf_query <- GDCquery(
+  project = 'TCGA-BRCA',
+  data.category = "Simple Nucleotide Variation",
+  access = "open",
+  data.type = "Masked Somatic Mutation",
+  workflow.type = "Aliquot Ensemble Somatic Variant Merging and Masking")
+#GDCdownload(maf_query)
+maf <- GDCprepare(maf_query)
+maf_object <- read.maf(maf = maf,
+                       clinicalData = clinical,
+                       isTCGA = TRUE)
+
+# Initialize clincal_rad and clincal_drug
+clin_query <- GDCquery(project = "TCGA-BRCA", data.category = "Clinical", file.type = "xml")
+
+clinical_drug <- GDCprepare_clinic(query = clin_query, clinical.info = "drug")
+clinical_rad <- GDCprepare_clinic(query = clin_query, clinical.info = "radiation")
 ```
 
 
 *1*
 Choose a clinical variable (or any variable from clin_rad or clin_drug) to separate your populations into two different groups and rewrite the column or create a new column with that variable as a factor. ***Do not use age or vital_status as your clinical variable.*** Hint: if your variable is continuous, you will need to determine your own cutoffs for the different levels of the factor. If your variable is categorical and has more than two possible values, choose the two that are the most common.
 ```{r}
-
+#regimen_number
+clinical_drug_therapy_cleaned_mask <- ifelse(clinical_drug$therapy_types == 'Chemotherapy'
+                                             | clinical_drug$therapy_types == 'Hormone Therapy', 
+                                             T, F)
+clinical_drug_therapy_cleaned <- clinical_drug[clinical_drug_therapy_cleaned_mask,]
 ```
 
 
@@ -33,7 +72,17 @@ Choose a clinical variable (or any variable from clin_rad or clin_drug) to separ
 Create a co-oncoplot with the top 10-20 (you choose) most mutated genes for the two groups. Pick one that has a large discrepancy in % mutated or type of mutations between the groups and research it. 
 Research it. What is the gene used for? Can you think of any reason for the discrepancy?
 ```{r}
+chemo_mask <- ifelse(clinical_drug_reg_cleaned$therapy_types == 'Chemotherapy', T, F)
+hormone_mask <- ifelse(clinical_drug_reg_cleaned$therapy_types == 'Hormone Therapy', T, F)
 
+chemo_patient_barcodes <- maf_object@clinical.data$Tumor_Sample_Barcode[chemo_mask]
+hormone_patient_barcodes <- maf_object@clinical.data$Tumor_Sample_Barcode[hormone_mask]
+
+chemo_maf <- subsetMaf(maf = maf_object, tsb = chemo_patient_barcodes)
+hormone_maf <- subsetMaf(maf = maf_object, tsb = hormone_patient_barcodes)
+
+coOncoplot(m1 = chemo_maf, m2 = hormone_maf, m1Name = 'Chemotherapy', 
+           m2Name = 'Hormone Therapy', borderCol = NA)
 ```
 
 
@@ -41,7 +90,27 @@ Research it. What is the gene used for? Can you think of any reason for the disc
 Create a contingency table with your variable and chosen gene. Run a Fisher’s Exact Test between presence of mutations for that gene and your clinical variable. Create and save a mosaic plot. 
 Interpret the output of the Fisher’s Exact Test in terms of the odds ratio and p-value.
 ```{r}
+# Chosen gene: TP53
 
+# Subset maf to TP53
+TP53_maf <- subsetMaf(maf = maf_object, genes = 'TP53')
+
+# TP53 Barcodes
+TP53_gene_barcodes <- TP53_maf@clinical.data$Tumor_Sample_Barcode
+num_TP53_pos <- length(TP53_gene_barcodes)
+
+num_chemo <- length(chemo_patient_barcodes)
+num_hormone <- length(hormone_patient_barcodes)
+
+chemo_TP53_pos <- length(intersect(chemo_patient_barcodes, TP53_gene_barcodes))
+hormone_TP53_pos <- length(intersect(hormone_patient_barcodes, TP53_gene_barcodes))
+chemo_TP53_neg <- length(TP53_gene_barcodes) - chemo_TP53_pos
+hormone_TP53_neg <- length(TP53_gene_barcodes) - hormone_TP53_pos
+
+contig <- matrix(c(chemo_TP53_pos, chemo_TP53_neg, hormone_TP53_pos, hormone_TP53_neg),
+                 nrow = 2)
+
+mosaicplot(contig)
 ```
 
 
@@ -49,7 +118,11 @@ Interpret the output of the Fisher’s Exact Test in terms of the odds ratio and
 Subset your maf_object based on your chosen clinical variable and create a co-lollipop plot of your chosen gene divided between the two different clinical variable possibilities. Include descriptive names on your plot.
 Do you notice any difference in terms of mutations (e.g. sites, types, number) between the two populations?
 ```{r}
-
+lollipopPlot(m1 = chemo_maf, 
+              m2 = hormone_maf, 
+              m1_name = 'Chemotherapy', 
+              m2_name = 'Hormone Therapy', 
+              gene = "TP53")
 ```
 
 
@@ -57,5 +130,11 @@ Do you notice any difference in terms of mutations (e.g. sites, types, number) b
 Create your Overall_Survival_Status column and create a mafSurvival KM plot based on mutations in your chosen gene.
 Does there seem to be a difference? Hypothesize why or not based on the other analysis you did with the gene above.
 ```{r}
+maf_object@clinical.data$Overall_Survival_Status <- ifelse(maf_object@clinical.data$vital_status == 'Alive', T, F)
 
+mafSurvival(maf = maf_object,
+            genes = "TP53",
+            time = "days_to_last_followup",
+            Status = "Overall_Survival_Status",
+            isTCGA = TRUE)
 ```
