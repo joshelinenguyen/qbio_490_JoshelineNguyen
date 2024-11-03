@@ -18,7 +18,7 @@ In SummarizedExperiment Tutorial, you learned how to manipulate the SummarizedEx
 *Pre-Assignment*
 Use knitr function to set your working directory to your analysis_data folder in 490_cluster.
 ```{r setup}
- knitr::opts_knit$set(root.dir = normalizePath("/PATH/TO/analysis_data"))
+ knitr::opts_knit$set(root.dir = normalizePath("/GitHub/qbio490/qbio_490_joshelinenguyen/analysis_data"))
 ```
 
 If DESeq2 is not already installed, install it now
