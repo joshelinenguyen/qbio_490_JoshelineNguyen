@@ -6,7 +6,7 @@ updated: 10/17/24
 ---
 
 ```{r setup}
-    knitr::opts_knit$set(root.dir = normalizePath("/PATH/TO/analysis_data")) 
+    knitr::opts_knit$set(root.dir = normalizePath("/GitHub/qbio490/qbio_490_joshelinenguyen/analysis_data")) 
 ```
 
 
@@ -34,7 +34,8 @@ Let's take a look at rna_se (RNA Summarized Experiment). Call head() and str(). 
 
 ```{r Exercise 1.1}
 # write code here
-rna_se
+head(rna_se)
+str(rna_se)
 ```
 
 Use the dim() function to find the dimensions of the colData, rowRanges@elementMetadata, and unstranded dataframes. Record them below:
@@ -45,7 +46,10 @@ Use the dim() function to find the dimensions of the colData, rowRanges@elementM
 
 ```{r Exercise 1.2}
 # write code here
-
+# colData is the clinical dataframe (one of the 6)
+dim(rna_se@colData)
+dim(rna_se@rowRanges@elementMetadata)
+dim(rna_se@assays@data$unstranded)
 ```
 
 Run the following code and fill out a description of the rows/columns of our data frames. You can use this as a cheat sheet moving forward.
@@ -61,11 +65,14 @@ Run the following code and fill out a description of the rows/columns of our dat
   
 ```{r Exercise 1.3}
 # colData: 
-
+rownames(rna_se@colData)
+colnames(rna_se@colData)
 
 # rowRanges:
+str(rna_se@rowRanges)
 
 # what are the rows... Hint: Do the rows match a dimension of another dataframe?
+# the different genes
 
 # for unstranded, don't call anything, just use your logic from earlier!
 ```
@@ -77,28 +84,27 @@ Using the nested dataframe colData in rna_se, view the first 15 values in the ag
 ```{r Exercise 2.1}
 # write code here
 rna_clinical <- as.data.frame(rna_se@colData)
+head(rna_se@colData$age_at_index, 15)
 ```
 
 Call summary on the age_at_index column. Record the output below:
-    Min.: 
-    1st Qu.: 
-    Median: 
-    Mean: 
-    3rd Qu.: 
-    Max.: 
-    NA's: 
+    Min.: 26.00
+    1st Qu.: 48.00
+    Median: 58.00
+    Mean: 58.29
+    3rd Qu.: 67.00
+    Max.: 90.00
+    NA's: 1
     
 ```{r Exercise 2.2}
 # write code here
-
+summary(rna_se@colData$age_at_index)
 ```
 
 Create a data frame called rna_clinical that contains data from colData.
 
 ```{r Exercise 2.3}
-
-
-
+rna_clinical <- rna_se@colData[!is.na(rna_se@colData$age_at_index), ]
 ```
 
 Use the as.data.frame() function to change this from an S4 object to a data frame object.
