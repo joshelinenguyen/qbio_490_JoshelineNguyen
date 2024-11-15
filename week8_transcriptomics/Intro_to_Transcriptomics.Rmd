@@ -18,20 +18,23 @@ In SummarizedExperiment Tutorial, you learned how to manipulate the SummarizedEx
 *Pre-Assignment*
 Use knitr function to set your working directory to your analysis_data folder in 490_cluster.
 ```{r setup}
- knitr::opts_knit$set(root.dir = normalizePath("/GitHub/qbio490/qbio_490_joshelinenguyen/analysis_data"))
+ knitr::opts_knit$set(root.dir = normalizePath("/home1/joshelin/490_cluster/analysis_data"))
 ```
 
 If DESeq2 is not already installed, install it now
 ```{r}
 if (!require("DESeq2", quietly = TRUE))
 BiocManager::install("DESeq2")
+
+if (!require("EnhancedVolcano", quietly = TRUE))
+BiocManager::install("EnhancedVolcano")
 ```
 
 Load in all necessary packages
 ```{r}
-
+library(DESeq2)
+library(EnhancedVolcano)
 ```
-
 
 
 *1*
@@ -39,6 +42,9 @@ Read in the rna_clinical, rna_genes, and rna_counts dataframes which you made in
 
 ```{r}
 
+rna_clinical <- read.csv('brca_rna_clinical_data.csv', row.names = 1)
+rna_genes <- read.csv('brca_rna_gene_data.csv')
+rna_counts <- read.csv('brca_rna_count_data.csv', row.names = 1)
 
 ```
 
@@ -48,6 +54,19 @@ In this assignment, you will run differential expression analysis comparing pati
 
 Manipulate those columns so that they are ready for differential expression analysis (hint: what kind of variables are they? what data type are they by default? do you need to handle unknown values?) Filter out genes with a total expression across all patients less than 1000.
 ```{r}
+head(rna_clinical)
+head(rna_counts)
+
+rna_clinical$definition <- factor(rna_clinical$definition)
+
+rna_clinical$age_at_initial_pathologic_diagnosis <- as.numeric(rna_clinical$age_at_diagnosis)
+
+rna_clinical$paper_BRCA_Subtype_PAM50 <- factor(rna_clinical$paper_BRCA_Subtype_PAM50)
+
+NA_mask <- !is.na(rna_clinical$definition) & !is.na(rna_clinical$age_at_diagnosis)
+  
+rna_clinical_clean <- rna_clinical[NA_mask, ]
+rna_counts_clean <- rna_counts[, NA_mask]
 
 
 ```
@@ -56,22 +75,24 @@ Manipulate those columns so that they are ready for differential expression anal
 *3*
 Perform the differential expression analysis, All you need to do is fill in the appropriate # terms
 ```{r}
-dds <- DESeqDataSetFromMatrix(countData = #fill in,
-                              colData = #fill in,
-                              design= #fill in)
+colnames(rna_counts_clean) <- rna_clinical_clean$barcode
+dds <- DESeqDataSetFromMatrix(countData = rna_counts_clean,
+                              colData = rna_clinical_clean,
+                              design= ~ age_at_initial_pathologic_diagnosis + definition)
 
 dds_obj <- DESeq(dds)
 
 resultsNames(dds_obj)
 
-results <- results(dds_obj, format = "DataFrame", contrast = c(#variable name, #numerator , #denominator))
+results <- results(dds_obj, format = "DataFrame", contrast = c("definition", "Primary solid Tumor", "Solid Tissue Normal"))
 
 results <- data.frame(results)
 ```
 
 Prepare results dataframe for EnhancedVolcano plotting. Add two columns, "-log10(padj)" and "gene_name". Fill in these columns appropriately.
 ```{r}
-
+results$`-log10(padj)` <- -log10(results$padj)
+results$gene_name <- rownames(results)
 ```
 
 *4*
