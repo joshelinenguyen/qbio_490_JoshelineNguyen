@@ -109,11 +109,11 @@ EnhancedVolcano(results,
 
 *5*
 # Explain what genes from each part of the Volcano Plot mean in terms of their significance and up/down regulation. 
-top-right genes: 
-bottom-right genes: 
-top-left genes: 
-bottom-left genes: 
-top-middle genes: 
-bottom-middle genes: 
+top-right genes: upregulated genes, pretty significant
+bottom-right genes: upregulated genes, significant
+top-left genes: downregulated genes, pretty significant
+bottom-left genes: downregulated genes, significant
+top-middle genes: not significant
+bottom-middle genes: not significant
 
 Save the picture of the volcano plot (using either ggsave() or right clicking and manually downloading the image and push this .Rmd and the image to GitHub)
